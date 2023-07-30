@@ -26,9 +26,9 @@ plot(t_yolo,drone2_yolov7conf,':r','LineWidth',1);
 hold on
 plot(t_yolo,drone3_yolov7conf,'-.c','LineWidth',1);
 grid minor;
-title('Confidence about Drone by YOLOv7')
+%title('Confidences achieved by YOLOv7')
 xlabel('t(s)');ylabel('Confidence')
-legend('drone1','drone2','drone3')
+legend('Drone1','Drone2','Drone3')
 %% Extract confidence of RHC
 filename = [datafolder,'Drone1_conf.txt'];
 fileID = fopen(filename);
@@ -81,3 +81,52 @@ grid minor;
 title('Confidence of drone3 by RHC')
 xlabel('t(s)');ylabel('Confidence')
 legend('bird','drone')
+%%
+drone1_yolo = drone1_yolov7conf(1:225);
+drone2_yolo = drone2_yolov7conf(1:225);
+drone3_yolo = drone3_yolov7conf(1:225);
+% fused_drone1_conf = max(drone1_RHCconf_drone, drone1_yolo);
+% fused_drone2_conf = max(drone2_RHCconf_drone, drone2_yolo);
+% fused_drone3_conf = max(drone3_RHCconf_drone, drone3_yolo);
+% figure;
+% plot(t_rhc,fused_drone1_conf,'-b','LineWidth',1);
+% hold on
+% plot(t_rhc,fused_drone2_conf,':r','LineWidth',1);
+% hold on
+% plot(t_rhc,fused_drone3_conf,'-.c','LineWidth',1);
+% grid minor;
+% title('Fused confidence')
+% xlabel('t(s)');ylabel('Fused confidence')
+% legend('Drone1','Drone2','Drone3')
+fused_drone1_conf = zeros(1,length(t_rhc));
+fused_drone2_conf = zeros(1,length(t_rhc));
+fused_drone3_conf = zeros(1,length(t_rhc));
+omega = 0.7; 
+for i=1:length(t_rhc)
+    if drone1_yolo(i,1) >= omega
+        fused_drone1_conf(1,i) = drone1_yolo(i,1);
+    else
+        fused_drone1_conf(1,i) = max(drone1_yolo(i,1),drone1_RHCconf_drone(i,1));
+    end
+    if drone2_yolo(i,1) >= omega
+        fused_drone2_conf(1,i) = drone2_yolo(i,1);
+    else
+        fused_drone2_conf(1,i) = max(drone2_yolo(i,1),drone2_RHCconf_drone(i,1));
+    end
+    if drone3_yolo(i,1) >= omega
+        fused_drone3_conf(1,i) = drone3_yolo(i,1);
+    else
+        fused_drone3_conf(1,i) = max(drone3_yolo(i,1),drone3_RHCconf_drone(i,1));
+    end
+end
+
+figure;
+plot(t_rhc,fused_drone1_conf,'-b','LineWidth',1);
+hold on
+plot(t_rhc,fused_drone2_conf,':r','LineWidth',1);
+hold on
+plot(t_rhc,fused_drone3_conf,'-.c','LineWidth',1);
+grid minor;
+title('Fused confidence')
+xlabel('t(s)');ylabel('Fused confidence')
+legend('Drone1','Drone2','Drone3')
